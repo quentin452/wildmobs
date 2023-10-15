@@ -4,6 +4,7 @@ import com.wildmobsmod.entity.ISkinnedEntity;
 import com.wildmobsmod.items.WildMobsModItems;
 import com.wildmobsmod.main.WildMobsMod;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityLivingData;
@@ -196,18 +197,25 @@ public class EntityButterfly extends EntityAmbientCreature implements ISkinnedEn
 		return EnumCreatureAttribute.ARTHROPOD;
 	}
 
-	public boolean getCanSpawnHere()
-	{
-		if(this.worldObj.rand.nextInt(2) == 0)
-		{
-			return false;
-		}
-		else
-		{
-			int i = MathHelper.floor_double(this.posX);
-			int j = MathHelper.floor_double(this.boundingBox.minY);
-			int k = MathHelper.floor_double(this.posZ);
-			return this.worldObj.getBlock(i, j - 1, k) == Blocks.grass && this.worldObj.getFullBlockLightValue(i, j, k) > 8 && super.getCanSpawnHere();
-		}
-	}
+    public boolean getCanSpawnHere()
+    {
+        if (this.worldObj.rand.nextInt(2) == 0)
+        {
+            return false;
+        }
+        else
+        {
+            int i = MathHelper.floor_double(this.posX);
+            int j = MathHelper.floor_double(this.boundingBox.minY);
+            int k = MathHelper.floor_double(this.posZ);
+
+            Block block = this.worldObj.getBlock(i, j - 1, k);
+            int lightValue = this.worldObj.getBlockLightValue(i, j, k);
+
+            boolean isDaytime = this.worldObj.isDaytime();
+            boolean isOnGrass = block == Blocks.grass;
+
+            return isDaytime && isOnGrass && lightValue > 8 && super.getCanSpawnHere();
+        }
+    }
 }
