@@ -235,12 +235,14 @@ public class EntityGoose extends EntityCreature implements IAnimals
 
             if (blockXY.getMaterial() == Material.water && blockXZ.getMaterial() != Material.water) {
                 this.spawnPosition = new ChunkCoordinates(x, y, z);
+                break;
             }
 
             int m = y + this.rand.nextInt(maxY - minY) - this.rand.nextInt(maxY - minY);
 
             if (this.worldObj.getBlock(x, m - 1, z) != Blocks.water && this.worldObj.getBlock(x, m - 1, z).isNormalCube() && this.rand.nextInt(4) == 0 && !this.onGround) {
                 this.spawnPosition = new ChunkCoordinates(x, y, z);
+                break;
             }
         }
     }
