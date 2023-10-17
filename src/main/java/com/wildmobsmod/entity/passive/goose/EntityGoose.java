@@ -187,11 +187,13 @@ public class EntityGoose extends EntityCreature implements IAnimals
     }
 
     protected void updateAITasks() {
-        if (this.spawnPosition != null && (!this.worldObj.isAirBlock(this.spawnPosition.posX, this.spawnPosition.posY, this.spawnPosition.posZ) || this.spawnPosition.posY < 1)) {
-            this.spawnPosition = null;
+        if (this.spawnPosition != null) {
+            if (!this.worldObj.isAirBlock(this.spawnPosition.posX, this.spawnPosition.posY, this.spawnPosition.posZ) || this.spawnPosition.posY < 1) {
+                this.spawnPosition = null;
+            }
         }
 
-        if (this.spawnPosition == null || this.rand.nextInt(40) == 0 || this.spawnPosition.getDistanceSquared((int) this.posX, (int) this.posY, (int) this.posZ) < 4.0F) {
+        if (this.spawnPosition == null || this.rand.nextInt(40) == 0 || (this.spawnPosition.getDistanceSquared((int) this.posX, (int) this.posY, (int) this.posZ) < 4.0F)) {
             this.findNewSpawnPosition();
         }
 
@@ -203,15 +205,18 @@ public class EntityGoose extends EntityCreature implements IAnimals
             d2 = (int) this.posZ + (double) this.getFlyingDirectionZ() + 0.5D - this.posZ;
             this.updateMotion(d0, d2, 0.4D);
         } else if (this.getFlyingState() != 1 && this.getFlyingState() != 2 && this.getFlyingState() != 3 && !this.onGround) {
-            d0 = (double) this.spawnPosition.posX + 0.5D - this.posX;
-            d2 = (double) this.spawnPosition.posZ + 0.5D - this.posZ;
+            if (this.spawnPosition != null) { // Ajoutez une vérification ici
+                d0 = (double) this.spawnPosition.posX + 0.5D - this.posX;
+                d2 = (double) this.spawnPosition.posZ + 0.5D - this.posZ;
 
-            double speed = this.getIsIdle() ? 0.07D : 0.04D;
-            this.updateMotion(d0, d2, speed);
+                double speed = this.getIsIdle() ? 0.07D : 0.04D;
+                this.updateMotion(d0, d2, speed);
+            }
         }
 
         super.updateAITasks();
     }
+
 
     private void findNewSpawnPosition() {
         int j = (int) this.posX;
