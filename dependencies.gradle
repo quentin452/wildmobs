@@ -33,5 +33,7 @@
  *
  * For more details, see https://docs.gradle.org/8.0.1/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
+
 dependencies {
+    implementation files('lib/multithreadingandtweaks-V0.8.9.0-dev.jar')
 }

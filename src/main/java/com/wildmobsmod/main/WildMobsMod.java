@@ -42,16 +42,16 @@ import net.minecraftforge.common.AchievementPage;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
-@Mod(modid = WildMobsMod.MODID, name = WildMobsMod.MODNAME, version = WildMobsMod.VERSION, guiFactory = "com.wildmobsmod.main.GUIFactory")
+@Mod(modid = WildMobsMod.MODID, name = WildMobsMod.MODNAME, version = WildMobsMod.VERSION, guiFactory = "com.wildmobsmod.main.GUIFactory",dependencies = "required-after:multithreadingandtweaks@[0.8,);")
 public class WildMobsMod
 {
 	public static final String MODID = "wildmobsmod", MODNAME = "Wild Mobs", VERSION = "1.5.3";
-	
+
 	@SidedProxy(clientSide = "com.wildmobsmod.main.ClientProxy", serverSide = "com.wildmobsmod.main.ServerProxy")
 	public static IProxy proxy;
 
 	public static Configuration config;
-	
+
 	public static final String CONFIG_CATEGORY_GENERAL = "_general";
 	public static final String CONFIG_CATEGORY_ENTITIES = "entities";
 
@@ -61,7 +61,7 @@ public class WildMobsMod
 	public static final boolean enableFoxUnnaturalVariants = true; // flag is still (technically) in use, but no longer configurable (whether a functionality like this should be available in a proper SkinnedEntity-System remains to be decided)
 
 	private static final String[] MIRED_LOOT = {"minecraft:bone, 1, 8", "minecraft:bone, 2, 4", "minecraft:wheat_seeds, 1, 7", "minecraft:wheat_seeds, 2, 2", "minecraft:arrow, 1, 5", "minecraft:arrow, 2, 2", "minecraft:rotten_flesh, 1, 6", "minecraft:stick, 1, 5", "minecraft:torch, 1, 4", "minecraft:bread, 1, 4", "minecraft:poisonous_potato, 1, 3", "minecraft:potato, 1, 2", "minecraft:coal:1, 1, 2", "minecraft:book, 1, 1", "minecraft:book, 2, 1", "minecraft:stone_sword, 1, 1", "minecraft:stone_pickaxe, 1, 1", "minecraft:stone_axe, 1, 1", "minecraft:stone_shovel, 1, 1", "minecraft:leather_helmet, 1, 1", "minecraft:leather_chestplate, 1, 1", "minecraft:leather_leggings, 1, 1", "minecraft:leather_boots, 1, 1", "minecraft:gold_nugget, 1, 1"};
-	
+
 	// Monster
 	public static final EntityConfigDreathMired DREATH_MIRED_CONFIG = EntityConfigDreathMired.construct("Dreath", 5, 1, 1, true, true, true, 1.0D, true, 3, MIRED_LOOT, false);
 	public static final EntityConfig FADED_CONFIG = EntityConfig.construct("Faded", 4, 1, 1, true);
@@ -69,7 +69,7 @@ public class WildMobsMod
 	public static final EntityConfig SEASCORPION_CONFIG = EntityConfig.construct("Sea Scorpion", 5, 1, 1, true);
 	public static final EntityConfig TARANTULA_CONFIG = EntityConfig.construct("Tarantula", 15, 4, 4, true);
 	public static final EntityConfig ZOMGUS_CONFIG = EntityConfig.construct("Zomgus", 8, 4, 4, true);
-	
+
 	// Passive
 	public static final EntityConfig ARMADILLO_CONFIG = EntityConfig.construct("Armadillo", 5, 1, 1, true);
 	public static final EntityConfig BISON_CONFIG = EntityConfig.construct("Bison", 4, 6, 10, true);
@@ -96,11 +96,11 @@ public class WildMobsMod
 
 	@Instance(MODID)
 	public static WildMobsMod modInstance;
-	
+
 	public static final CreativeTabs TAB_WILDMOBS = new CreativeTabs(MODID)
-	{	
+	{
 		@Override
-		public Item getTabIconItem() 
+		public Item getTabIconItem()
 		{
 			return WildMobsModItems.fur;
 		}
@@ -172,7 +172,7 @@ public class WildMobsMod
 		}
 		potionAquaHealing = (new PotionAquaHealing(WildMobsMod.aquaHealingID)).setIconIndex(0, 0).setPotionName("potion.wildmobs.aqua_healing");
 	}
-	
+
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event)
 	{
@@ -184,9 +184,9 @@ public class WildMobsMod
 		skeletonWolfChance = config.getInt("skeletonWolfChance", CONFIG_CATEGORY_ENTITIES, 3, -1, 100, "Chance (in Percent) for a Skeleton Wolf to spawn alongside a Skeleton (0 to disable; -1 to prevent the Skeleton Wolf Entity from being registered)");
 		aquaHealingID = config.getInt("aquaHealingId", CONFIG_CATEGORY_GENERAL, 40, 0, 1024, "The Potion ID for Aqua Healing, please do your research before changing this!");
 		enableCalamari = config.getBoolean("enableCalamari", CONFIG_CATEGORY_GENERAL, true, "Make Squids drop calamari");
-		
+
 		EntityConfig.syncAll(config);
-		
+
 		if(config.hasChanged())
 		{
 			config.save();
@@ -198,10 +198,10 @@ public class WildMobsMod
 	{
 		if(eventArgs.modID.equals(MODID)) syncConfig();
 	}
-	
-	
+
+
 	public static final String ENTITY_LOADING_FLAG_NAME = "wm_NotNewChecked";
-	
+
 	/**
 	 *  <b>Required to prevent chanced replacement handlers from rolling every time the entity is loaded from a save!</b><br>
 	 *  Creates a Boolean NBTTag ({@link #ENTITY_LOADING_FLAG_NAME}) to track if an entity has been reviewed by this function at any point.
@@ -209,7 +209,7 @@ public class WildMobsMod
 	 *  Explicitly setting the Tag to false or deleting it will make the game "forget" the entity is being loaded and is highly discouraged due to potential world-breakage.<br>
 	 *  If possible this functionality should be replaced with Vanilla/Forge methods or at least a unified framework (if multiple mods need to do this, they will otherwise all add their own Tags).<br>
 	 */
-	public static boolean checkIsEntityNew(Entity entity) { 
+	public static boolean checkIsEntityNew(Entity entity) {
 		NBTTagCompound nbt = entity.getEntityData();
 		if(nbt.getBoolean(ENTITY_LOADING_FLAG_NAME)) {
 			return false;

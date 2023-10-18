@@ -4,6 +4,7 @@ import com.wildmobsmod.entity.ISkinnedEntity;
 import com.wildmobsmod.items.WildMobsModItems;
 import com.wildmobsmod.main.WildMobsMod;
 
+import fr.iamacat.multithreading.utils.apache.commons.math3.util.FastMath;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityLivingData;
@@ -39,7 +40,7 @@ public class EntityDragonfly extends EntityAmbientCreature implements ISkinnedEn
 		this.dataWatcher.addObject(20, Byte.valueOf((byte) 0));
 		this.dataWatcher.addObject(21, Byte.valueOf((byte) 0));
 	}
-	
+
 	public IEntityLivingData onSpawnWithEgg(IEntityLivingData data)
 	{
 		super.onSpawnWithEgg(data);
@@ -172,7 +173,7 @@ public class EntityDragonfly extends EntityAmbientCreature implements ISkinnedEn
 			this.motionX += (Math.signum(d0) * 0.3D - this.motionX) * 0.15D;
 			this.motionY += (Math.signum(d1) * 0.7D - this.motionY) * 0.15D;
 			this.motionZ += (Math.signum(d2) * 0.3D - this.motionZ) * 0.15D;
-			float f = (float) (Math.atan2(this.motionZ, this.motionX) * 180.0D / Math.PI) - 90.0F;
+			float f = (float) (FastMath.atan2(this.motionZ, this.motionX) * 180.0D / Math.PI) - 90.0F;
 			float f1 = MathHelper.wrapAngleTo180_float(f - this.rotationYaw);
 			this.moveForward = 0.5F;
 			this.rotationYaw += f1;

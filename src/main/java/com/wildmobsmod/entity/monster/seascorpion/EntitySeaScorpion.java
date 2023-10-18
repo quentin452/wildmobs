@@ -9,6 +9,7 @@ import com.wildmobsmod.entity.bases.EntityMobTameable;
 import com.wildmobsmod.items.WildMobsModItems;
 import com.wildmobsmod.main.WildMobsMod;
 
+import fr.iamacat.multithreading.utils.apache.commons.math3.util.FastMath;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.command.IEntitySelector;
@@ -41,7 +42,7 @@ public class EntitySeaScorpion extends EntityMobTameable
 	// This mob is completely finished and shouldn't be changed at all. There's
 	// a lot of information about it on my Discord server.
 	//
-	
+
 	// Changed to more resource-friendly spawn system
 
 	private ChunkCoordinates cachedPosition;
@@ -55,7 +56,7 @@ public class EntitySeaScorpion extends EntityMobTameable
 	private int timeToCalculatePosY;
 	private double movedDist;
 	private int timeToJump;
-	
+
 	private boolean canSpawnPack = true; // prevent pack members from spawning their own packs - only used for on-spawn handling
 
 	private ItemStack food;
@@ -108,9 +109,9 @@ public class EntitySeaScorpion extends EntityMobTameable
 	{
 		super.entityInit();
 		this.dataWatcher.addObject(20, Byte.valueOf((byte) 0));
-		this.dataWatcher.addObject(21, new Integer(0));
-		this.dataWatcher.addObject(22, new Integer(0));
-		this.dataWatcher.addObject(23, new Integer(0));
+		this.dataWatcher.addObject(21, 0);
+		this.dataWatcher.addObject(22, 0);
+		this.dataWatcher.addObject(23, 0);
 		this.dataWatcher.addObject(24, Byte.valueOf((byte) 0));
 	}
 
@@ -267,7 +268,7 @@ public class EntitySeaScorpion extends EntityMobTameable
 		checkBlockCollision();
 		final int flooredX = MathHelper.floor_double(posX), flooredY = MathHelper.floor_double(posY), flooredZ = MathHelper.floor_double(posZ);
 		final Block blockAtPos = worldObj.getBlock(flooredX, flooredY, flooredZ);
-		
+
 		// Movement
 		if(blockAtPos.getMaterial() == Material.water) {
 			if(timeToJump > 0) {
@@ -330,7 +331,7 @@ public class EntitySeaScorpion extends EntityMobTameable
 				findHumanToAttack();
 			}
 		}
-		
+
 		if(entityToAttack != null) {
 			if(getGrowingAge() < 0 || !canAttackTargetBeSeen(entityToAttack)) {
 				entityToAttack = null;
@@ -428,14 +429,14 @@ public class EntitySeaScorpion extends EntityMobTameable
 
 	public void updateEntityActionState() {
 		super.updateEntityActionState();
-		renderYawOffset = rotationYaw = -((float) Math.atan2(motionX, motionZ)) * 180.0F / (float) Math.PI;
+		renderYawOffset = rotationYaw = -((float) FastMath.atan2(motionY, motionZ)) * 180.0F / (float) Math.PI;
 	}
 
 	protected void checkBlockCollision() {
 		if(cachedPosition == null || cachedPosition.posY != (int) posY) return;
 		int spawnX = cachedPosition.posX, spawnY = cachedPosition.posY, spawnZ = cachedPosition.posZ;
 		int x = MathHelper.floor_double(posX), y = MathHelper.floor_double(posY), z = MathHelper.floor_double(posZ);
-		
+
 		if(spawnZ > posZ && worldObj.getBlock(x, y, z + 1).isNormalCube()) {
 			cachedPosition = entityToAttack == null ? new ChunkCoordinates(x + rand.nextInt(12) - rand.nextInt(12), y + rand.nextInt(8) - 2, z - rand.nextInt(12)) : null;
 		} else if(spawnX < posX && worldObj.getBlock(x - 1, y, z).isNormalCube()) {
@@ -516,7 +517,7 @@ public class EntitySeaScorpion extends EntityMobTameable
 	protected void findLivingToAttack() {
 		findAttackTarget(targetEntitySelectorLiving);
 	}
-	
+
 	protected void findAttackTarget(IEntitySelector selector) {
 		List list = worldObj.selectEntitiesWithinAABB(EntityLivingBase.class, boundingBox.expand(16.0D, 16.0D, 16.0D), selector);
 		Collections.sort(list, theNearestAttackableTargetSorter);

@@ -5,6 +5,7 @@ import com.wildmobsmod.entity.ai.EntityAIWanderGoose;
 import com.wildmobsmod.items.WildMobsModItems;
 import com.wildmobsmod.main.WildMobsMod;
 
+import fr.iamacat.multithreading.utils.apache.commons.math3.util.FastMath;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityCreature;
@@ -256,7 +257,7 @@ public class EntityGoose extends EntityCreature implements IAnimals
         this.motionX += (Math.signum(d0) * speed - this.motionX) * 0.1500000014901161;
         this.motionZ += (Math.signum(d2) * speed - this.motionZ) * 0.1500000014901161;
 
-        float f = (float) (Math.atan2(this.motionZ, this.motionX) * 180.0D / Math.PI) - 90.0F;
+        float f = (float) (FastMath.atan2(this.motionZ, this.motionX) * 180.0D / Math.PI) - 90.0F;
         float f1 = MathHelper.wrapAngleTo180_float(f - this.rotationYaw);
         this.moveForward = 0.05F;
         this.rotationYaw += f1;
