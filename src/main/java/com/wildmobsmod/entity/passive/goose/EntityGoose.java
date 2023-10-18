@@ -233,24 +233,31 @@ public class EntityGoose extends EntityCreature implements IAnimals
 
         for (int i = 0; i < 500; ++i) {
             int x = minX + this.rand.nextInt(maxX - minX);
-            int y = minY;
             int z = minZ + this.rand.nextInt(maxZ - minZ);
 
-            Block blockXY = this.worldObj.getBlock(x, y - 1, z);
-            Block blockXZ = this.worldObj.getBlock(x, y, z);
-
-            if (blockXY.getMaterial() == Material.water && blockXZ.getMaterial() != Material.water) {
-                this.spawnPosition = new ChunkCoordinates(x, y, z);
-                break;
-            }
-
-            int m = y + this.rand.nextInt(maxY - minY) - this.rand.nextInt(maxY - minY);
-
-            if (this.worldObj.getBlock(x, m - 1, z) != Blocks.water && this.worldObj.getBlock(x, m - 1, z).isNormalCube() && this.rand.nextInt(4) == 0 && !this.onGround) {
-                this.spawnPosition = new ChunkCoordinates(x, y, z);
+            if (isValidSpawnPosition(x, k, z)) {
+                this.spawnPosition = new ChunkCoordinates(x, k, z);
                 break;
             }
         }
+    }
+
+    private boolean isValidSpawnPosition(int x, int y, int z) {
+        Block blockXY = this.worldObj.getBlock(x, y - 1, z);
+        Block blockXZ = this.worldObj.getBlock(x, y, z);
+        boolean isWaterMaterial = blockXY.getMaterial() == Material.water && blockXZ.getMaterial() != Material.water;
+
+        if (isWaterMaterial) {
+            return true;
+        }
+
+        int m = y + this.rand.nextInt(5) - this.rand.nextInt(5);
+
+        if (this.worldObj.getBlock(x, m - 1, z) != Blocks.water && this.worldObj.getBlock(x, m - 1, z).isNormalCube() && this.rand.nextInt(4) == 0 && !this.onGround) {
+            return true;
+        }
+
+        return false;
     }
 
     private void updateMotion(double d0, double d2, double speed) {
