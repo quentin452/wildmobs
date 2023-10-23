@@ -5,7 +5,7 @@ import com.wildmobsmod.entity.ai.EntityAIWanderGoose;
 import com.wildmobsmod.items.WildMobsModItems;
 import com.wildmobsmod.main.WildMobsMod;
 
-import fr.iamacat.multithreading.utils.apache.commons.math3.util.FastMath;
+import fr.iamacat.optimizationsandtweaks.utils.apache.commons.math3.util.FastMath;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityCreature;

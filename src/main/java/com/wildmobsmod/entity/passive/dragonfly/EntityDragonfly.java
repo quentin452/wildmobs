@@ -4,7 +4,7 @@ import com.wildmobsmod.entity.ISkinnedEntity;
 import com.wildmobsmod.items.WildMobsModItems;
 import com.wildmobsmod.main.WildMobsMod;
 
-import fr.iamacat.multithreading.utils.apache.commons.math3.util.FastMath;
+import fr.iamacat.optimizationsandtweaks.utils.apache.commons.math3.util.FastMath;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityLivingData;
