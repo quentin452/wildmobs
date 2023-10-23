@@ -195,10 +195,6 @@ public class EntityGoose extends EntityCreature implements IAnimals
             }
         }
 
-        if (this.spawnPosition == null || this.rand.nextInt(40) == 0 || (this.spawnPosition.getDistanceSquared((int) this.posX, (int) this.posY, (int) this.posZ) < 4.0F)) {
-            this.findNewSpawnPosition();
-        }
-
         double d0;
         double d2;
 

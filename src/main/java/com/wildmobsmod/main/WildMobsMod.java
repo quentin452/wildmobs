@@ -42,7 +42,7 @@ import net.minecraftforge.common.AchievementPage;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
-@Mod(modid = WildMobsMod.MODID, name = WildMobsMod.MODNAME, version = WildMobsMod.VERSION, guiFactory = "com.wildmobsmod.main.GUIFactory",dependencies = "required-after:multithreadingandtweaks@[0.8,);")
+@Mod(modid = WildMobsMod.MODID, name = WildMobsMod.MODNAME, version = WildMobsMod.VERSION, guiFactory = "com.wildmobsmod.main.GUIFactory",dependencies = "required-after:optimizationsandtweaks;")
 public class WildMobsMod
 {
 	public static final String MODID = "wildmobsmod", MODNAME = "Wild Mobs", VERSION = "1.5.3";

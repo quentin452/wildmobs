@@ -35,5 +35,5 @@
  */
 
 dependencies {
-    implementation files('lib/multithreadingandtweaks-V0.8.9.0-dev.jar')
+    implementation files('lib/OptimizationsandTweaks-V1.0-dev.jar')
 }
