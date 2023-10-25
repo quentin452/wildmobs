@@ -22,6 +22,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.BiomeDictionary;
 
 public class EntityGoose extends EntityCreature implements IAnimals
 {
@@ -248,218 +250,156 @@ public class EntityGoose extends EntityCreature implements IAnimals
         }
     }
 
-    public void onLivingUpdate()
-    {
+    public void onLivingUpdate() {
         super.onLivingUpdate();
 
-        if(!this.onGround)
-        {
-            if(this.rand.nextFloat() < 0.02F && this.getIsIdle())
-            {
+        if (!this.onGround) {
+            float randFloat = this.rand.nextFloat();
+            if (randFloat < 0.02F && this.getIsIdle()) {
                 this.setIsIdle(false);
-            }
-            else if(this.rand.nextFloat() < 0.01F && !this.getIsIdle())
-            {
+            } else if (randFloat < 0.01F && !this.getIsIdle()) {
                 this.setIsIdle(true);
             }
-        }
-        else
-        {
-            if(this.rand.nextFloat() < 0.01F && this.getIsIdle())
-            {
+        } else {
+            float randFloat = this.rand.nextFloat();
+            if (randFloat < 0.01F && this.getIsIdle()) {
                 this.setIsIdle(false);
-            }
-            else if(this.rand.nextFloat() < 0.05F && !this.getIsIdle())
-            {
+            } else if (randFloat < 0.05F && !this.getIsIdle()) {
                 this.setIsIdle(true);
             }
             this.fallTimer = 0;
         }
 
-        int i = this.getFlyingTime();
+        int flyingState = this.getFlyingState();
+        int flyingTime = this.getFlyingTime();
 
-        if(this.getFlyingState() == 1)
-        {
-            if(!this.worldObj.isRemote)
-            {
-                if(this.getFlyingTime() >= 120)
-                {
+        if (flyingState == 1) {
+            if (!this.worldObj.isRemote) {
+                if (flyingTime >= 120) {
                     this.setFlyingState(2);
-                }
-                else
-                {
-                    i++;
-                    this.setFlyingTime(i);
+                } else {
+                    flyingTime++;
+                    this.setFlyingTime(flyingTime);
                 }
             }
 
             this.motionY = 1.0D;
             this.motionY *= 0.2D;
 
-            if(this.rand.nextFloat() < 0.025F && this.getFlyingTime() >= 10 && !this.worldObj.isRemote)
-            {
+            if (this.rand.nextFloat() < 0.025F && flyingTime >= 10 && !this.worldObj.isRemote) {
                 this.setFlyingState(2);
             }
 
             this.fallTimer = 10;
             this.checkBlockCollision();
-        }
-        else if(this.getFlyingState() == 2)
-        {
+        } else if (flyingState == 2) {
             this.setFlyingTime(0);
             this.motionY = 0.0D;
             this.motionY *= 0.2D;
 
-            if(this.rand.nextFloat() < 0.025F && !this.worldObj.isRemote)
-            {
+            if (this.rand.nextFloat() < 0.025F && !this.worldObj.isRemote) {
                 this.setFlyingState(3);
             }
 
             this.fallTimer = 10;
             this.checkBlockCollision();
-        }
-        else if(this.getFlyingState() == 3)
-        {
+        } else if (flyingState == 3) {
             this.setFlyingTime(0);
             this.motionY = -1.0D;
             this.motionY *= 0.2D;
-            if(this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) - 1, MathHelper.floor_double(this.posZ)).getMaterial() == Material.water && !this.worldObj.isRemote)
-            {
+
+            int blockX = MathHelper.floor_double(this.posX);
+            int blockY = MathHelper.floor_double(this.posY) - 1;
+            int blockZ = MathHelper.floor_double(this.posZ);
+            Block blockBelow = this.worldObj.getBlock(blockX, blockY, blockZ);
+
+            if (blockBelow.getMaterial() == Material.water && !this.worldObj.isRemote) {
                 this.setFlyingState(0);
             }
-            if(this.onGround && !this.worldObj.isRemote)
-            {
+
+            if (this.onGround && !this.worldObj.isRemote) {
                 this.setFlyingState(0);
             }
+
             this.fallTimer = 10;
             this.checkBlockCollision();
-        }
-        else
-        {
+        } else {
             this.setFlyingTime(0);
-            if(this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.water
-                && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) + 1, MathHelper.floor_double(this.posZ)).getMaterial() != Material.water)
-            {
-                this.motionY = 0.015D;
-                this.motionY *= 0.7D;
-                if(this.rand.nextFloat() < 0.00015F && !this.worldObj.isRemote)
-                {
-                    this.setFlyingState(1);
-                    if(this.rand.nextInt(2) == 0)
-                    {
-                        this.setFlyingDirectionX(1000 + this.rand.nextInt(1000));
-                    }
-                    else
-                    {
-                        this.setFlyingDirectionX(-1000 - this.rand.nextInt(1000));
+            int blockX = MathHelper.floor_double(this.posX);
+            int blockY = MathHelper.floor_double(this.posY);
+            int blockZ = MathHelper.floor_double(this.posZ);
+            Block blockAtCurrentPos = this.worldObj.getBlock(blockX, blockY, blockZ);
+
+            if (blockAtCurrentPos.getMaterial() == Material.water) {
+                int blockYAbove = blockY + 1;
+                Block blockAbove = this.worldObj.getBlock(blockX, blockYAbove, blockZ);
+
+                if (blockAbove.getMaterial() != Material.water) {
+                    this.motionY = 0.015D;
+                    this.motionY *= 0.7D;
+
+                    float randFloat = this.rand.nextFloat();
+                    if (randFloat < 0.00015F && !this.worldObj.isRemote) {
+                        this.setFlyingState(1);
+                        this.setFlyingDirectionX(this.rand.nextInt(2) == 0 ? 1000 + this.rand.nextInt(1000) : -1000 - this.rand.nextInt(1000));
+                        this.setFlyingDirectionZ(this.rand.nextInt(2) == 0 ? 1000 + this.rand.nextInt(1000) : -1000 - this.rand.nextInt(1000));
+                        this.playSound("wildmobsmod:entity.goose.flying", this.getSoundVolume(), this.getSoundPitch());
                     }
 
-                    if(this.rand.nextInt(2) == 0)
-                    {
-                        this.setFlyingDirectionZ(1000 + this.rand.nextInt(1000));
-                    }
-                    else
-                    {
-                        this.setFlyingDirectionZ(-1000 - this.rand.nextInt(1000));
-                    }
-                    this.playSound("wildmobsmod:entity.goose.flying", this.getSoundVolume(), this.getSoundPitch());
+                    this.fallTimer = 0;
+                } else {
+                    this.motionY = 0.1D;
+                    this.motionY *= 0.7D;
+                    this.fallTimer = 0;
                 }
-                this.fallTimer = 0;
-            }
-            else if(this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.water
-                && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) + 1, MathHelper.floor_double(this.posZ)).getMaterial() == Material.water)
-            {
-                this.motionY = 0.1D;
-                this.motionY *= 0.7D;
-                this.fallTimer = 0;
-            }
-            else if(this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) - 1, MathHelper.floor_double(this.posZ)).getMaterial() == Material.water
-                && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() != Material.water)
-            {
-                this.motionY *= 0.4D;
-                if(this.rand.nextFloat() < 0.00015F && !this.worldObj.isRemote)
-                {
-                    this.setFlyingState(1);
-                    if(this.rand.nextInt(2) == 0)
-                    {
-                        this.setFlyingDirectionX(1000 + this.rand.nextInt(1000));
-                    }
-                    else
-                    {
-                        this.setFlyingDirectionX(-1000 - this.rand.nextInt(1000));
-                    }
+            } else if (blockAtCurrentPos.getMaterial() == Material.water) {
+                int blockYAbove = blockY + 1;
+                Block blockAbove = this.worldObj.getBlock(blockX, blockYAbove, blockZ);
 
-                    if(this.rand.nextInt(2) == 0)
-                    {
-                        this.setFlyingDirectionZ(1000 + this.rand.nextInt(1000));
-                    }
-                    else
-                    {
-                        this.setFlyingDirectionZ(-1000 - this.rand.nextInt(1000));
-                    }
-                    this.playSound("wildmobsmod:entity.goose.flying", this.getSoundVolume(), this.getSoundPitch());
+                if (blockAbove.getMaterial() == Material.water) {
+                    this.motionY = 0.1D;
+                    this.motionY *= 0.7D;
+                    this.fallTimer = 0;
                 }
-                if(this.fallTimer < 5 && !this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) - 1, MathHelper.floor_double(this.posZ)).isNormalCube())
-                {
-                    this.fallTimer++;
-                }
-            }
-            else
-            {
-                if(this.fallTimer < 5 && !this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) - 1, MathHelper.floor_double(this.posZ)).isNormalCube())
-                {
+            } else {
+                if (this.fallTimer < 5 && !this.worldObj.getBlock(blockX, blockY - 1, blockZ).isNormalCube()) {
                     this.fallTimer++;
                 }
                 this.motionY *= 0.6D;
             }
         }
 
-        //
         // Animations
-        //
-        if(this.getFlyingState() == 1)
-        {
+        if (flyingState == 1) {
             this.animation = 3;
-        }
-        else if(this.getFlyingState() == 2)
-        {
+        } else if (flyingState == 2) {
             this.animation = 4;
-        }
-        else if(this.getFlyingState() == 3)
-        {
+        } else if (flyingState == 3) {
             this.animation = 5;
-        }
-        else
-        {
-            if(this.fallTimer >= 5)
-            {
+        } else {
+            if (this.fallTimer >= 5) {
                 this.animation = 1;
-            }
-            else
-            {
-                if(this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.water
-                    && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) + 1, MathHelper.floor_double(this.posZ)).getMaterial() != Material.water)
-                {
+            } else {
+                int blockX = MathHelper.floor_double(this.posX);
+                int blockY = MathHelper.floor_double(this.posY);
+                int blockZ = MathHelper.floor_double(this.posZ);
+                Block blockAtCurrentPos = this.worldObj.getBlock(blockX, blockY, blockZ);
+
+                int blockYAbove = blockY + 1;
+                Block blockAbove = this.worldObj.getBlock(blockX, blockYAbove, blockZ);
+
+                if (blockAtCurrentPos.getMaterial() == Material.water && blockAbove.getMaterial() != Material.water) {
                     this.animation = 2;
-                }
-                else if(this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.water
-                    && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) + 1, MathHelper.floor_double(this.posZ)).getMaterial() == Material.water)
-                {
+                } else if (blockAtCurrentPos.getMaterial() == Material.water && blockAbove.getMaterial() == Material.water) {
                     this.animation = 2;
-                }
-                else if(this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY) - 1, MathHelper.floor_double(this.posZ)).getMaterial() == Material.water
-                    && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() != Material.water)
-                {
+                } else if (blockAtCurrentPos.getMaterial() == Material.water && blockAbove.getMaterial() != Material.water) {
                     this.animation = 2;
-                }
-                else
-                {
+                } else {
                     this.animation = 0;
                 }
             }
         }
     }
-
     public void onUpdate()
     {
         super.onUpdate();
@@ -475,12 +415,6 @@ public class EntityGoose extends EntityCreature implements IAnimals
         else if(this.feedingAnimation >= 30)
         {
             this.feedingAnimation = 0;
-        }
-
-        if (!worldObj.isRemote && worldObj.getGameRules().getGameRuleBooleanValue("doMobSpawning") && worldObj.rand.nextInt(100) == 0) {
-            EntityGoose goose = new EntityGoose(worldObj);
-            goose.setLocationAndAngles(posX, posY, posZ, rotationYaw, 0);
-            worldObj.spawnEntityInWorld(goose);
         }
     }
 
@@ -541,18 +475,17 @@ public class EntityGoose extends EntityCreature implements IAnimals
             this.dropItem(WildMobsModItems.rawGoose, 1);
         }
     }
-
-    public boolean getCanSpawnHere()
-    {
-        if(this.worldObj.checkNoEntityCollision(this.boundingBox) && this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox).isEmpty() && !this.worldObj.isAnyLiquid(this.boundingBox))
-        {
-            int i = MathHelper.floor_double(this.posX);
-            int j = MathHelper.floor_double(this.boundingBox.minY);
-            int k = MathHelper.floor_double(this.posZ);
-            Block block = this.worldObj.getBlock(i, j - 1, k);
-            Block block1 = this.worldObj.getBlock(i, j, k);
-            return block.isNormalCube() || block.getMaterial() == Material.water || (block1.getMaterial() == Material.water && block.getMaterial() != Material.water);
+    @Override
+    public boolean getCanSpawnHere() {
+        if (!super.getCanSpawnHere()) {
+            return false;
         }
+
+        BiomeGenBase biome = worldObj.getBiomeGenForCoords((int)this.posX, (int)this.posZ);
+        if (biome == BiomeGenBase.beach) {
+            return true;
+        }
+
         return false;
     }
 }
