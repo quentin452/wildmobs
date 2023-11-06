@@ -191,10 +191,9 @@ public class EntityGoose extends EntityCreature implements IAnimals
     }
 
     protected void updateAITasks() {
-        if (this.spawnPosition != null) {
-            if (!this.worldObj.isAirBlock(this.spawnPosition.posX, this.spawnPosition.posY, this.spawnPosition.posZ) || this.spawnPosition.posY < 1) {
+        if (this.spawnPosition != null && (!this.worldObj.isAirBlock(this.spawnPosition.posX, this.spawnPosition.posY, this.spawnPosition.posZ) || this.spawnPosition.posY < 1)) {
                 this.spawnPosition = null;
-            }
+
         }
 
         double d0;
@@ -204,14 +203,13 @@ public class EntityGoose extends EntityCreature implements IAnimals
             d0 = (int) this.posX + (double) this.getFlyingDirectionX() + 0.5D - this.posX;
             d2 = (int) this.posZ + (double) this.getFlyingDirectionZ() + 0.5D - this.posZ;
             this.updateMotion(d0, d2, 0.4D);
-        } else if (this.getFlyingState() != 1 && this.getFlyingState() != 2 && this.getFlyingState() != 3 && !this.onGround) {
-            if (this.spawnPosition != null) { // Ajoutez une vérification ici
+        } else if (this.getFlyingState() != 1 && this.getFlyingState() != 2 && this.getFlyingState() != 3 && !this.onGround && (this.spawnPosition != null)) {
                 d0 = (double) this.spawnPosition.posX + 0.5D - this.posX;
                 d2 = (double) this.spawnPosition.posZ + 0.5D - this.posZ;
 
                 double speed = this.getIsIdle() ? 0.07D : 0.04D;
                 this.updateMotion(d0, d2, speed);
-            }
+
         }
 
         super.updateAITasks();
@@ -221,50 +219,57 @@ public class EntityGoose extends EntityCreature implements IAnimals
         this.motionX += (Math.signum(d0) * speed - this.motionX) * 0.1500000014901161;
         this.motionZ += (Math.signum(d2) * speed - this.motionZ) * 0.1500000014901161;
 
-        float f = (float) (FastMath.atan2(this.motionZ, this.motionX) * 180.0D / Math.PI) - 90.0F;
-        float f1 = MathHelper.wrapAngleTo180_float(f - this.rotationYaw);
+        float newRotation = (float) (FastMath.atan2(this.motionZ, this.motionX) * 180.0D / Math.PI) - 90.0F;
+        float rotationDiff = MathHelper.wrapAngleTo180_float(newRotation - this.rotationYaw);
+
+        float maxRotationSpeed = 2.0F;
+        if (rotationDiff > maxRotationSpeed) {
+            rotationDiff = maxRotationSpeed;
+        } else if (rotationDiff < -maxRotationSpeed) {
+            rotationDiff = -maxRotationSpeed;
+        }
+
+        this.rotationYaw += rotationDiff;
+
         this.moveForward = 0.05F;
-        this.rotationYaw += f1;
-    }
-    protected void checkBlockCollision()
-    {
-        if(this.rotationYaw < 45 && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ) + 1).isNormalCube())
-        {
-            this.setFlyingState(0);
-        }
-        else if(this.rotationYaw >= 45 && this.rotationYaw < 135 && this.worldObj.getBlock(MathHelper.floor_double(this.posX) - 1, MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).isNormalCube())
-        {
-            this.setFlyingState(0);
-        }
-        else if(this.rotationYaw >= 135 && this.rotationYaw < 225 && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ) - 1).isNormalCube())
-        {
-            this.setFlyingState(0);
-        }
-        else if(this.rotationYaw >= 225 && this.rotationYaw < 315 && this.worldObj.getBlock(MathHelper.floor_double(this.posX) + 1, MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).isNormalCube())
-        {
-            this.setFlyingState(0);
-        }
-        else if(this.rotationYaw >= 315 && this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ) + 1).isNormalCube())
-        {
-            this.setFlyingState(0);
-        }
     }
 
+    protected void checkBlockCollision() {
+        int blockX = MathHelper.floor_double(this.posX);
+        int blockY = MathHelper.floor_double(this.posY);
+        int blockZ = MathHelper.floor_double(this.posZ);
+
+        int blockOffsetX = 0;
+        int blockOffsetZ = 0;
+
+        if (this.rotationYaw < 45 || this.rotationYaw >= 315) {
+            blockOffsetZ = 1;
+        } else if (this.rotationYaw < 135) {
+            blockOffsetX = -1;
+        } else if (this.rotationYaw < 225) {
+            blockOffsetZ = -1;
+        } else if (this.rotationYaw < 315) {
+            blockOffsetX = 1;
+        }
+
+        if (this.worldObj.getBlock(blockX + blockOffsetX, blockY, blockZ + blockOffsetZ).isNormalCube()) {
+            this.setFlyingState(0);
+        }
+    }
+    private int isJumpingOutOfWaterTimer = 0;
     public void onLivingUpdate() {
         super.onLivingUpdate();
 
         if (!this.onGround) {
-            float randFloat = this.rand.nextFloat();
-            if (randFloat < 0.02F && this.getIsIdle()) {
+            if (this.rand.nextFloat() < 0.02F && this.getIsIdle()) {
                 this.setIsIdle(false);
-            } else if (randFloat < 0.01F && !this.getIsIdle()) {
+            } else if (this.rand.nextFloat() < 0.01F && !this.getIsIdle()) {
                 this.setIsIdle(true);
             }
         } else {
-            float randFloat = this.rand.nextFloat();
-            if (randFloat < 0.01F && this.getIsIdle()) {
+            if (this.rand.nextFloat() < 0.01F && this.getIsIdle()) {
                 this.setIsIdle(false);
-            } else if (randFloat < 0.05F && !this.getIsIdle()) {
+            } else if (this.rand.nextFloat() < 0.05F && !this.getIsIdle()) {
                 this.setIsIdle(true);
             }
             this.fallTimer = 0;
@@ -315,6 +320,8 @@ public class EntityGoose extends EntityCreature implements IAnimals
 
             if (blockBelow.getMaterial() == Material.water && !this.worldObj.isRemote) {
                 this.setFlyingState(0);
+            } else if (!this.getIsIdle()) {
+                this.setFlyingState(0);
             }
 
             if (this.onGround && !this.worldObj.isRemote) {
@@ -338,11 +345,15 @@ public class EntityGoose extends EntityCreature implements IAnimals
                     this.motionY = 0.015D;
                     this.motionY *= 0.7D;
 
-                    float randFloat = this.rand.nextFloat();
-                    if (randFloat < 0.00015F && !this.worldObj.isRemote) {
+                    if (this.rand.nextFloat() < 0.00015F && !this.worldObj.isRemote) {
                         this.setFlyingState(1);
-                        this.setFlyingDirectionX(this.rand.nextInt(2) == 0 ? 1000 + this.rand.nextInt(1000) : -1000 - this.rand.nextInt(1000));
-                        this.setFlyingDirectionZ(this.rand.nextInt(2) == 0 ? 1000 + this.rand.nextInt(1000) : -1000 - this.rand.nextInt(1000));
+                        this.setFlyingDirectionX(this.rand.nextInt(2) == 0
+                            ? 1000 + this.rand.nextInt(1000)
+                            : 1000 - this.rand.nextInt(1000));
+
+                        this.setFlyingDirectionZ(this.rand.nextInt(2) == 0
+                            ? 1000 + this.rand.nextInt(1000)
+                            : 1000 - this.rand.nextInt(1000));
                         this.playSound("wildmobsmod:entity.goose.flying", this.getSoundVolume(), this.getSoundPitch());
                     }
 
@@ -352,32 +363,30 @@ public class EntityGoose extends EntityCreature implements IAnimals
                     this.motionY *= 0.7D;
                     this.fallTimer = 0;
                 }
-            } else if (blockAtCurrentPos.getMaterial() == Material.water) {
-                int blockYAbove = blockY + 1;
-                Block blockAbove = this.worldObj.getBlock(blockX, blockYAbove, blockZ);
-
-                if (blockAbove.getMaterial() == Material.water) {
-                    this.motionY = 0.1D;
-                    this.motionY *= 0.7D;
-                    this.fallTimer = 0;
-                }
             } else {
                 if (this.fallTimer < 5 && !this.worldObj.getBlock(blockX, blockY - 1, blockZ).isNormalCube()) {
                     this.fallTimer++;
                 }
-                this.motionY *= 0.6D;
+                this.motionY *= 1.2D;
             }
         }
+        if (this.isInWater()) {
+            this.animation = 0;
+            return;
+        }
 
-        // Animations
-        if (flyingState == 1) {
-            this.animation = 3;
-        } else if (flyingState == 2) {
-            this.animation = 4;
-        } else if (flyingState == 3) {
-            this.animation = 5;
+        if (this.isJumpingOutOfWaterTimer > 0) {
+            this.isJumpingOutOfWaterTimer--;
         } else {
-            if (this.fallTimer >= 5) {
+            // Animations
+            if (flyingState == 1) {
+                this.animation = 3;
+            } else if (flyingState == 2) {
+                this.animation = 4;
+                this.isJumpingOutOfWaterTimer = 10;
+            } else if (flyingState == 3) {
+                this.animation = 5;
+            } else if (this.fallTimer >= 5) {
                 this.animation = 1;
             } else {
                 int blockX = MathHelper.floor_double(this.posX);
@@ -385,21 +394,21 @@ public class EntityGoose extends EntityCreature implements IAnimals
                 int blockZ = MathHelper.floor_double(this.posZ);
                 Block blockAtCurrentPos = this.worldObj.getBlock(blockX, blockY, blockZ);
 
-                int blockYAbove = blockY + 1;
-                Block blockAbove = this.worldObj.getBlock(blockX, blockYAbove, blockZ);
+                Block blockAbove = this.worldObj.getBlock(blockX, blockY, blockZ);
 
-                if (blockAtCurrentPos.getMaterial() == Material.water && blockAbove.getMaterial() != Material.water) {
-                    this.animation = 2;
-                } else if (blockAtCurrentPos.getMaterial() == Material.water && blockAbove.getMaterial() == Material.water) {
-                    this.animation = 2;
-                } else if (blockAtCurrentPos.getMaterial() == Material.water && blockAbove.getMaterial() != Material.water) {
-                    this.animation = 2;
+                if (blockAtCurrentPos.getMaterial() == Material.water) {
+                    if (blockAbove.getMaterial() != Material.water) {
+                        this.animation = 2;
+                    } else {
+                        this.animation = 0;
+                    }
                 } else {
                     this.animation = 0;
                 }
             }
         }
     }
+
     public void onUpdate()
     {
         super.onUpdate();
